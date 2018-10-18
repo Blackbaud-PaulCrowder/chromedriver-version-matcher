@@ -2,7 +2,7 @@ const spawn = require('cross-spawn');
 const request = require('request');
 const chromeFinder = require('chrome-launcher/dist/src/chrome-finder');
 const chromeUtils = require('chrome-launcher/dist/src/utils');
-const parser = require('xml2json');
+const parser = require('xml2js');
 
 function getChromeMajorVersion() {
   const promise = new Promise((resolve, reject) => {
@@ -43,31 +43,35 @@ function getLatestChromeDriverVersion() {
         if (error) {
           reject(error);
         } else {
-          const results = JSON.parse(parser.toJson(body));
-        
-          const versionNumbers = results.ListBucketResult.Contents
-            .filter((contents) => {
-              return contents.Key.indexOf('/notes.txt') >= 0;
-            })
-            .map((contents) => {
-              return contents.Key.split('/')[0];
-            })
-            .sort((a, b) => {
-              const aMinorVersion = +a.split('.')[1];
-              const bMinorVersion = +b.split('.')[1];
-  
-              if (aMinorVersion < bMinorVersion) {
-                return 1;
-              }
-  
-              if (bMinorVersion < aMinorVersion) {
-                return -1;
-              }
-  
-              return 0;
-            });
-  
-          resolve(versionNumbers[0]);
+          parser.parseString(body, (err, results) => {
+            if (err) {
+              reject(err);
+            } else {
+              const versionNumbers = results.ListBucketResult.Contents
+                .filter((contents) => {
+                  return contents.Key[0].indexOf('/notes.txt') >= 0;
+                })
+                .map((contents) => {
+                  return contents.Key[0].split('/')[0];
+                })
+                .sort((a, b) => {
+                  const aMinorVersion = +a.split('.')[1];
+                  const bMinorVersion = +b.split('.')[1];
+    
+                  if (aMinorVersion < bMinorVersion) {
+                    return 1;
+                  }
+    
+                  if (bMinorVersion < aMinorVersion) {
+                    return -1;
+                  }
+    
+                  return 0;
+                });
+                
+              resolve(versionNumbers[0]);
+            }
+          });
         }
       }
     );
