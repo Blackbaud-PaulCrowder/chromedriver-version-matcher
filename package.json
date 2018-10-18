@@ -1,0 +1,20 @@
+{
+  "name": "chromedriver-version-matcher",
+  "version": "1.0.0",
+  "description": "Finds the version of ChromeDriver that is compatible with the locally-installed version of Chrome.",
+  "main": "index.js",
+  "dependencies": {
+    "chrome-launcher": "0.10.5",
+    "cross-spawn": "6.0.5",
+    "request": "2.88.0",
+    "xml2json": "0.11.2"
+  },
+  "devDependencies": {
+    "eslint": "5.7.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Paul Crowder",
+  "license": "MIT"
+}
