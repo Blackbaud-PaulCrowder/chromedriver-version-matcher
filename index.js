@@ -35,49 +35,57 @@ function getChromeMajorVersion() {
   return promise;
 }
 
-function getLatestChromeDriverRelease() {
-  return new Promise((resolve) => {
+function getLatestChromeDriverVersion() {
+  return new Promise((resolve, reject) => {
     request(
       'https://chromedriver.storage.googleapis.com/', 
       (error, response, body) => {
-        const results = JSON.parse(parser.toJson(body));
+        if (error) {
+          reject(error);
+        } else {
+          const results = JSON.parse(parser.toJson(body));
         
-        const versionNumbers = results.ListBucketResult.Contents
-          .filter((contents) => {
-            return contents.Key.indexOf('/notes.txt') >= 0;
-          })
-          .map((contents) => {
-            return contents.Key.split('/')[0];
-          })
-          .sort((a, b) => {
-            const aMinorVersion = +a.split('.')[1];
-            const bMinorVersion = +b.split('.')[1];
-
-            if (aMinorVersion < bMinorVersion) {
-              return 1;
-            }
-
-            if (bMinorVersion < aMinorVersion) {
-              return -1;
-            }
-
-            return 0;
-          });
-
-        resolve(versionNumbers[0]);
+          const versionNumbers = results.ListBucketResult.Contents
+            .filter((contents) => {
+              return contents.Key.indexOf('/notes.txt') >= 0;
+            })
+            .map((contents) => {
+              return contents.Key.split('/')[0];
+            })
+            .sort((a, b) => {
+              const aMinorVersion = +a.split('.')[1];
+              const bMinorVersion = +b.split('.')[1];
+  
+              if (aMinorVersion < bMinorVersion) {
+                return 1;
+              }
+  
+              if (bMinorVersion < aMinorVersion) {
+                return -1;
+              }
+  
+              return 0;
+            });
+  
+          resolve(versionNumbers[0]);
+        }
       }
     );
   });
 }
 
-function getReleaseNotes(latestChromeDriverRelease) {
-  return new Promise((resolve) => {
+function getReleaseNotes(latestChromeDriverVersion) {
+  return new Promise((resolve, reject) => {
     request(
       'https://chromedriver.storage.googleapis.com/' + 
-        latestChromeDriverRelease +
+        latestChromeDriverVersion +
         '/notes.txt',
       (error, response, body) => {
-        resolve(body);
+        if (error) {
+          reject(error);
+        } else {
+          resolve(body);
+        }
       }
     );
   });
@@ -115,14 +123,14 @@ function getChromeDriverVersion() {
     Promise.all(
       [
         getChromeMajorVersion(),
-        getLatestChromeDriverRelease()  
+        getLatestChromeDriverVersion()  
       ]
     )
       .then((results) => {
         const chromeVersion = results[0];
-        const latestChromeDriverRelease = results[1];
+        const latestChromeDriverVersion = results[1];
 
-        getReleaseNotes(latestChromeDriverRelease)
+        getReleaseNotes(latestChromeDriverVersion)
           .then((releaseNotes) => {
             resolve({
               chromeVersion: chromeVersion.chromeVersion,
