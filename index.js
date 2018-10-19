@@ -40,7 +40,8 @@ function getChromeMajorVersion() {
       } else {
 
         const source = spawn(installations[0], ['--version']);
-        source.stderr.on('data', () => reject('Unable get Chrome version'));
+        source.stdout.on('close', () => reject('Unable to get Chrome version (close)'));
+        source.stderr.on('data', () => reject('Unable to get Chrome version (err)'));
         source.stdout.on('data', (data) => {
           const chromeVersion = data.toString()
             .trim().substr('Google Chrome '.length).split(' ')[0];
@@ -148,7 +149,7 @@ function findVersionInReleaseNotes(releaseNotes, chromeMajorVersion) {
 }
 
 function getChromeDriverVersion() {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     Promise.all(
       [
         getChromeMajorVersion(),
@@ -169,6 +170,10 @@ function getChromeDriverVersion() {
               )
             });
           });
+      })
+      .catch((err) => {
+        console.log(err);
+        reject(err);
       });
   });
 }
