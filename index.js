@@ -27,9 +27,10 @@ function getChromeMajorVersion() {
         source.stdout.on('close', () => reject('Unable to get Chrome version from wmic (close)'));
         source.stderr.on('data', () => reject('Unable to get Chrome version from wmic (err)'));
         source.stdout.on('data', (data) => {
-          const dataCleaned = data.toString().toLowerCase().trim().split('\r')[0];
+
+          const dataCleaned = data.toString().trim().toLowerCase();
           if (dataCleaned.indexOf('version=') > -1) {
-            const chromeVersion = dataCleaned.split('=')[1];
+            const chromeVersion = dataCleaned.split('version=')[1].split('wmic')[0].replace(/\r?\n|\r/g, '');
             resolve({
               chromeVersion: chromeVersion,
               chromeMajorVersion: getMajorFromVersion(chromeVersion)
@@ -183,4 +184,4 @@ module.exports = {
 };
 
 // USAGE:
-// getChromeDriverVersion().then(result => console.log(result));
+getChromeDriverVersion().then(result => console.log(result));
