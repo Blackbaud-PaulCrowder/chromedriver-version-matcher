@@ -184,4 +184,4 @@ module.exports = {
 };
 
 // USAGE:
-getChromeDriverVersion().then(result => console.log(result));
+// getChromeDriverVersion().then(result => console.log(result));
