@@ -13,6 +13,9 @@ function getChromeMajorVersion() {
     const platform = chromeUtils.getPlatform();
     const installations = chromeFinder[platform]();
 
+    console.log('Platform', platform);
+    console.log('Chrome Installations', installations);
+
     if (installations && installations.length > 0) {
       if (platform === 'win32') {
 
@@ -21,7 +24,8 @@ function getChromeMajorVersion() {
           `datafile where "name='${installations[0].replace(/\\/g, '\\\\')}'" get version /value`
         );
 
-        source.stderr.on('data', () => reject('Unable to get Chrome version from wmic'));
+        source.stdout.on('close', () => reject('Unable to get Chrome version from wmic (close)'));
+        source.stderr.on('data', () => reject('Unable to get Chrome version from wmic (err)'));
         source.stdout.on('data', (data) => {
           const dataCleaned = data.toString().toLowerCase().trim().split('\r')[0];
           if (dataCleaned.indexOf('version=') > -1) {
